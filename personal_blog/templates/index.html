@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogs</title>
+    <link rel="stylesheet" href="/static/style/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    {% csrf_token %}
+
+    <!-- <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const commentForm = document.querySelector('.comment-form');
+
+            const postId = commentForm.getAttribute('post-id');
+
+
+            commentForm.onsubmit = function (event) {
+                event.preventDefault();
+
+                const commentText = commentForm.querySelector('textarea[name="comment_text"]').value;
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                fetch('/blog/comment/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: JSON.stringify({
+                        post_id: postId,
+                        content: commentText
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+
+
+                        commentForm.querySelector('textarea[name="comment_text"]').value = '';
+
+
+                        const commentSection = document.querySelector('.comments-section');
+                        const newComment = `
+                <div class="comment">
+                    <p class="comment-text">${data.comment}</p>
+                    <small class="comment-meta">By ${data.author} on ${data.created_on}</small>
+                </div>
+            `;
+                        commentSection.insertAdjacentHTML('afterbegin', newComment);
+
+
+                        const countElement = document.querySelector('.nav-button');
+                        countElement.innerHTML = `Total Comments Made: ${data.total_comments}`;
+
+                    });
+            };
+        });
+    </script> -->
+
+</head>
+
+<body>
+    <header>
+        <nav class="nav_bar">
+            <div class="right_nav_bar">
+                <a href="#" class="nav-button">Total Comments Made: {{ request.session.comment_count|default:"0" }}</a>
+
+
+                <a href="{% url 'home' %}" class="nav-button">Home</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}" class="nav-button">Profile</a>
+                {% endif %}
+
+                <div class="dropdown">
+                    <button class="nav-button dropdown-toggle">Categories</button>
+                    <div class="dropdown-content">
+                        <a href="{% url 'categories' 'eduction' %}">Education</a>
+                        <a href="{% url 'categories' 'entertainment' %}">Entertainment</a>
+                        <a href="{% url 'categories' 'politics' %}">Politics</a>
+                        <a href="{% url 'categories' 'sports' %}">Sports</a>
+                        <a href="{% url 'categories' 'business' %}">Business</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="center_nav_bar">
+                <form action="{% url 'search' %}" method="get" class="search_bar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" name="q" placeholder="Search Blogs">
+                </form>
+            </div>
+
+            <div class="left_nav_bar">
+                <div class="button-field">
+                    {% if user.is_authenticated %}
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-button">Logout</button>
+                    </form>
+                    {% else %}
+                    <form action="{% url 'login' %}" method="get">
+                        <button type="submit" class="nav-button">Login</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <div class="container">
+                {% if blogs %}
+                {% for blog in blogs %}
+                <article class="blog-post">
+                    <h3 class="blog-title">{{ blog.title }}</h3>
+                    <p class="blog-content">{{ blog.content }}</p>
+
+                    {% if blog.content_img %}
+                    <div class="blog-image">
+                        <img src="{{ blog.content_img.url }}" alt="{{ blog.title }}" />
+                    </div>
+                    {% endif %}
+
+                    <p class="blog-author">By {{ blog.author }}</p>
+                    <p class="blog-date">Posted on: {{ blog.created_at }}</p>
+
+                    <section class="comments-section" post-id="{{ blog.id }}">
+                        <h4>Comments</h4>
+                        <div class="comments">
+                            {% for comment in blog.comments.all %}
+                            <div class="comment">
+                                <p class="comment-text">{{ comment.content }}</p>
+                                <small class="comment-meta">By {{ comment.author }} on {{ comment.date_posted }}</small>
+
+                            </div>
+                            {% empty %}
+                            <p class="no-comments">No comments yet.</p>
+                            {% endfor %}
+                        </div>
+
+                        {% if user.is_authenticated %}
+                        <form class="comment-form" method="post" post-id="{{ blog.id }}">
+                            {% csrf_token %}
+
+                            <textarea name="comment_text" placeholder="Add a comment..." required></textarea>
+                            <button type="submit">Post Comment</button>
+                        </form>
+                        {% else %}
+                        <p>Please log in to post a comment.</p>
+                        {% endif %}
+                    </section>
+                </article>
+                {% endfor %}
+                {% else %}
+                <p>No blogs posted yet.</p>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const commentForm = document.querySelector('.comment-form');
+        const postId = commentForm.getAttribute('post-id');
+
+        commentForm.onsubmit = function (event) {
+            event.preventDefault();
+
+            const commentText = commentForm.querySelector('textarea[name="comment_text"]').value;
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch('/blog/comment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    post_id: postId,
+                    content: commentText
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    commentForm.querySelector('textarea[name="comment_text"]').value = '';
+                    const commentSection = document.querySelector('.comments-section');
+                    const newComment = `
+            <div class="comment">
+                <p class="comment-text">${data.comment}</p>
+                <small class="comment-meta">By ${data.author} on ${data.created_on}</small>
+            </div>
+        `;
+                    commentSection.insertAdjacentHTML('afterbegin', newComment);
+
+
+                    const countComment = document.querySelector('.nav-button');
+                    countComment.innerHTML = `Total Comments Made: ${data.total_comments}`;
+                })
+        };
+    </script>
+
+</body>
+</html>

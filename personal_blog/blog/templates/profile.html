@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="/static/style/profile.css">
+
+</head>
+
+<body>
+    <header>
+        <nav class="nav_bar">
+            <div class="right_nav_bar">
+                <a href="{% url 'home' %}" class="nav-button">Home</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}" class="nav-button">Profile</a>
+                {% endif %}
+                <div class="dropdown">
+                    <button class="nav-button dropdown-toggle">Categories</button>
+                    <div class="dropdown-content">
+                        <a href="?category=education">Education</a>
+                        <a href="?category=entertainment">Entertainment</a>
+                        <a href="?category=politics">Politics</a>
+                        <a href="?category=sports">Sports</a>
+                        <a href="?category=business">Business</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="center_nav_bar">
+                <div class="search_bar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search Blogs">
+                </div>
+            </div>
+
+            <div class="left_nav_bar">
+                <div class="button-field">
+                    {% if user.is_authenticated %}
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-button">Logout</button>
+                    </form>
+                    {% else %}
+                    <form action="{% url 'login' %}" method="get">
+                        <button type="submit" class="nav-button">Login</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section>
+        <div class="top">
+            <h1>Your Blog Posts</h1>
+            <a href="{% url 'blogs' %}">Add New blog</a>
+        </div>
+        <div class="continar">
+
+            {% if blogs %}
+            {% for blog in blogs %}
+            <article>
+                <h3>
+                    {{ blog.title }}
+                </h3>
+                <p class="content">{{ blog.content }}</p>
+                {% if blog.content_img %}
+                <p class="content_img"><img src="{{ blog.content_img.url }}" alt="{{ blog.title }}" /></p>
+                {% endif %}
+                <p class="author">{{ blog.author }}</p>
+                <p>Posted on: {{ blog.created_at }}</p>
+
+                <div class="btn">
+                    <a href="{% url 'update_blog' blog.id %}">Edit</a>
+                    <!-- <a href="{% url 'delete_blog' blog.id %}">Delete</a> -->
+
+                    <form method="POST" action="{% url 'delete_blog' blog.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Delete</button>
+                    </form>
+                </div>
+
+            </article>
+            {% endfor %}
+            {% else %}
+            <p>No blogs posted yet.</p>
+            {% endif %}
+
+
+        </div>
+    </section>
+
+</body>
+
+</html>

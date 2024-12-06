@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>add blogs</title>
+    <link rel="stylesheet" href="/static/style/add_blogs.css">
+</head>
+
+<body>
+    <section>
+        <div class="container">
+            <div class="content">
+                <h1>add blog</h1>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="content_data">
+                        {{ form.title.label_tag }}
+                        {{ form.title }}
+                    </div>
+                    <div class="content_data">
+                        {{ form.content.label_tag }}
+                        {{ form.content }}
+                    </div>
+                    <div class="content_data">
+                        {{ form.content_img.label_tag }}
+                        {{ form.content_img }}
+                    </div>
+                    <div class="content_data">
+                        {{ form.category.label_tag }}
+                        {{ form.category }}
+                    </div>
+
+
+                    <div class="content_data">
+                        {{ form.author.label_tag }}
+                        {{ form.author }}
+                    </div>
+
+                    <div class="content_data button">
+                        <button type="submit">Add blog</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>
